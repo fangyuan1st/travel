@@ -1,17 +1,17 @@
 {
-  "version": "7311c6a63b64b1f5",
-  "total_bytes": 63286984,
+  "version": "d9e581cdf47794cb",
+  "total_bytes": 63353927,
   "assets": [
     {
       "url": "index.html",
-      "bytes": 1955,
-      "sha256": "c10a2ccb99e5af3651e938856902bf922ab5bae29cee9feba84ffd7bb7ca3309",
+      "bytes": 1778,
+      "sha256": "b17273b885bdce5fb818638fa278889f56bbdac6ba00c4a4a77f4b90458fbc82",
       "group": "core"
     },
     {
       "url": "language.js",
-      "bytes": 1309,
-      "sha256": "6a9487d25d2e89d81e378ba6b84f1f51ac41b25e77cf9246e4612ddc6d6276ff",
+      "bytes": 1307,
+      "sha256": "22ceece6a408025fd33468ee36462dc327022e38c36e2fb280d9120a03e3a3c0",
       "group": "core"
     },
     {
@@ -22,8 +22,8 @@
     },
     {
       "url": "app.js",
-      "bytes": 42623,
-      "sha256": "dfbbe47f08adba52102c8a1a355e6f779a05bcfe3169acbac74b808009e02557",
+      "bytes": 44070,
+      "sha256": "e552c796cc1b343e942aa1ff3f0f6a482c98f050e4fbce83d4bcd9b0944b415e",
       "group": "core"
     },
     {
@@ -34,8 +34,8 @@
     },
     {
       "url": "styles.css",
-      "bytes": 22995,
-      "sha256": "23012226070baa8ef6e81d8920690e064881a40ef9c8fd03f9dd76942749009f",
+      "bytes": 23148,
+      "sha256": "e016f4a308a8667f9926a62f4e3c1b8ed6288b6e75029048dfaaa46b493d03aa",
       "group": "core"
     },
     {
@@ -64,14 +64,14 @@
     },
     {
       "url": "icon-192.png",
-      "bytes": 1206,
-      "sha256": "b63f38b092bd92d8f9f177406b23011d60523dacb0d6955995539b7523d7ee8b",
+      "bytes": 17819,
+      "sha256": "712c40211bdacb4a34fa515287fadbfa4d14b75611cb0df2807212f5530fc8d4",
       "group": "core"
     },
     {
       "url": "icon-512.png",
-      "bytes": 3481,
-      "sha256": "43455c0ede7b9d0a1562b20c42aeb4eb038cca9ecd7b9300df5860414998df15",
+      "bytes": 52023,
+      "sha256": "622f024ebe66d432e2e6e773a20e7471c0c7e2e2cd509e2154a29a04f069888e",
       "group": "core"
     },
     {
@@ -82,8 +82,8 @@
     },
     {
       "url": "files.js",
-      "bytes": 8477,
-      "sha256": "bf20f4141b53b590c5a31770e9d9e080acb9491f4ffc342709e6555c7b8544a4",
+      "bytes": 8844,
+      "sha256": "cc51cd4e99b909ead3f11e02a9dd5b0f34b78c6b1f1c35405c8223f9148665ee",
       "group": "core"
     },
     {

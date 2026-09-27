@@ -3,6 +3,7 @@ window.TripFiles=(()=>{
  'use strict';
  const C=TripCrypto,objects=new Map(),blobs=[],base=new URL('./',location.href);
  let storageId='travel-unlock:'+base.pathname,lockId=storageId+':lock',epoch=0;
+ let contentKey=null;const entries=new Map(),pending=new Map();
  let active=false,expires=Infinity,access,lockStamp=null,scope='family';
  function selectScope(value){scope=value;storageId=access.format===2&&value==='family'?'travel-library:'+access.library.id:'travel-guest:'+base.pathname;lockId=storageId+':lock'}
  const leaseId=()=>access.format===2&&scope==='family'?access.library.id:access.pack_id;
@@ -10,14 +11,20 @@ window.TripFiles=(()=>{
  const tr=TripLanguage.text;let statusPair=null;const setStatus=(en,zh)=>{statusPair=[en,zh];const el=document.getElementById('unlock-status');if(el)el.textContent=tr(en,zh)};
  const read=()=>{try{const persistent=localStorage.getItem(storageId);return {value:JSON.parse(persistent||sessionStorage.getItem(storageId)||'null'),remember:!!persistent}}catch{return {value:null,remember:false}}};
  const forget=()=>{try{localStorage.removeItem(storageId);sessionStorage.removeItem(storageId)}catch{}};
- const clean=()=>{for(const u of blobs)URL.revokeObjectURL(u);blobs.length=0;objects.clear()};
+ const clean=()=>{for(const u of blobs)URL.revokeObjectURL(u);blobs.length=0;objects.clear();entries.clear();pending.clear();contentKey=null};
  function lock(notify=true){epoch++;active=false;forget();clean();if(notify)try{localStorage.setItem(lockId,Date.now()+':'+Math.random())}catch{}location.reload()}
  function check(){if(active&&(Date.now()>=expires||readStamp()!==lockStamp))lock(false)}
  addEventListener('pageshow',check);document.addEventListener('visibilitychange',check);setInterval(check,30000);
  addEventListener('storage',e=>{if(e.key===lockId){epoch++;forget();if(active)lock(false)}});
  async function bytes(path){const u=new URL(path,base);if(u.origin!==base.origin||!u.pathname.startsWith(base.pathname)||path.includes('..'))throw Error('Invalid release path');const r=await fetch(u);if(!r.ok||r.redirected)throw Error('Connect to finish downloading this guide.');return r.arrayBuffer()}
- async function load(raw){clean();const key=await C.importKey(raw);const index=JSON.parse(C.dec.decode(await C.open(key,await bytes(access.index),access.pack_id+':index')));
-  for(let i=0;i<index.files.length;i++){const f=index.files[i];const plain=await C.open(key,await bytes(f.encrypted),access.pack_id+':'+f.encrypted);if(f.path.endsWith('.json'))objects.set(f.path,{json:JSON.parse(C.dec.decode(plain))});else{const url=URL.createObjectURL(new Blob([plain],{type:f.mime}));blobs.push(url);objects.set(f.path,{url})}const status=document.getElementById('unlock-status');if(status)setStatus(`Opening saved files ${i+1}/${index.files.length}`,`正在打开文件 ${i+1}/${index.files.length}`)}
+ async function load(raw){clean();contentKey=await C.importKey(raw);const index=JSON.parse(C.dec.decode(await C.open(contentKey,await bytes(access.index),access.pack_id+':index')));for(const f of index.files)entries.set(f.path,f)}
+ async function resource(path){
+  await ready;check();if(!active)throw Error('Locked');
+  if(objects.has(path))return objects.get(path);
+  if(pending.has(path))return pending.get(path);
+  const f=entries.get(path),key=contentKey,started=epoch;if(!f)throw Error('Asset unavailable');
+  const task=(async()=>{const plain=await C.open(key,await bytes(f.encrypted),access.pack_id+':'+f.encrypted);check();if(!active||epoch!==started)throw Error('Locked');let value;if(f.mime==='application/json')value={json:JSON.parse(C.dec.decode(plain))};else{const url=URL.createObjectURL(new Blob([plain],{type:f.mime}));blobs.push(url);value={url}}objects.set(path,value);return value})();
+  pending.set(path,task);try{return await task}finally{if(pending.get(path)===task)pending.delete(path)}
  }
  const ready=new Promise(resolve=>{
   async function start(){
@@ -39,7 +46,7 @@ window.TripFiles=(()=>{
     const saved=existing||C.lease(shared||raw,id);expires=saved.expires;
     forget();if(scope==='family'){try{localStorage.removeItem('travel-guest:'+base.pathname);sessionStorage.removeItem('travel-guest:'+base.pathname)}catch{}}try{if(remember)localStorage.setItem(storageId,JSON.stringify(saved));else if(access.format===2)sessionStorage.setItem(storageId,JSON.stringify(saved))}catch{setStatus('Device storage unavailable; unlock lasts for this page.','无法保存设备信息；此次解锁仅在当前页面有效。')}
     lockStamp=readStamp();active=true;form.reset();main.replaceChildren();nav.hidden=false;nav.style.display='';language.hidden=false;
-    const button=document.createElement('button');button.className='language';button.id='lock-guide';button.textContent=tr('Lock now','立即锁定');button.onclick=()=>lock();document.querySelector('.mast').append(button);resolve();
+    const button=document.createElement('button');button.className='language';button.id='lock-guide';button.textContent=tr('Logout','退出登录');button.onclick=()=>lock();document.querySelector('.mast').append(button);resolve();
    }
    // Prefer a saved trip-only session so a guest never silently gains a family role.
    for(const savedScope of (access.format===2?['guest','family']:['family'])){
@@ -54,12 +61,12 @@ window.TripFiles=(()=>{
     event.preventDefault();const button=form.querySelector('button'),input=document.getElementById('guest-password'),remember=document.getElementById('remember-device').checked,attemptEpoch=epoch;
     button.disabled=true;setStatus('Unlocking…','正在解锁…');let raw,shared;
     try{const result=await C.unlockAccess(input.value,access);raw=result.raw;shared=result.shared;if(access.format===2)selectScope(result.scope);input.value='';await finish(raw,remember,null,shared,attemptEpoch)}
-    catch{clean();raw?setStatus('Unable to open all files. Connect and retry.','文件尚未完整下载，请联网后重试。'):setStatus('Incorrect passcode. Please try again.','口令不正确，请重试。')}
+    catch{clean();raw?setStatus('Unable to open the guide. Connect and retry.','无法打开指南，请联网后重试。'):setStatus('Incorrect passcode. Please try again.','口令不正确，请重试。')}
     finally{raw?.fill(0);shared?.fill(0);button.disabled=false}
    };
 
   }
   start();
  });
- return {ready,encrypted:true,get canSwitchTrips(){return active&&scope==='family'},json:async p=>{await ready;check();if(!active)throw Error('Locked');const v=objects.get(p);if(!v?.json)throw Error('Trip data missing');const result=structuredClone(v.json);if(scope==='guest'&&p==='data/config.json')delete result.other_trips;return result},url:p=>{check();const v=objects.get(p);if(!active||!v?.url)throw Error('Asset unavailable');return v.url},lock};
+ return {ready,encrypted:true,get canSwitchTrips(){return active&&scope==='family'},json:async p=>{const v=await resource(p);if(!v?.json)throw Error('Trip data missing');const result=structuredClone(v.json);if(scope==='guest'&&p==='data/config.json')delete result.other_trips;return result},url:async p=>{const v=await resource(p);if(!v?.url)throw Error('Asset unavailable');return v.url},lock};
 })();

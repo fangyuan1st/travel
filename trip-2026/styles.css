@@ -19,3 +19,5 @@ svg{flex-shrink:0}button{color:inherit}button:disabled{opacity:.55;cursor:wait}.
 
 #trip-library{width:min(540px,calc(100% - 32px))}.trip-library-toolbar{display:flex;justify-content:flex-end;gap:10px}.trip-library-item{display:flex;flex-direction:column;gap:8px;width:100%;padding:18px;margin:14px 0;border:1px solid var(--line);border-radius:14px;background:var(--paper);color:var(--ink);text-align:left;text-decoration:none;font:inherit}.trip-library-item span{font-size:13px;color:var(--muted)}.trip-library-item.current{border-color:var(--blue)}#choose-trip{font-size:13px}
 .kit-switch{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.kit-switch .button{max-width:none;min-width:0;padding:11px 8px}@media(max-width:420px){.kit-switch{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.brand-icon{width:44px;height:44px;flex-shrink:0;object-fit:contain}img[data-file]:not([src]){background:#e3eff0}img[data-load-error]{cursor:pointer}
