@@ -17,7 +17,7 @@ window.TripFiles=(()=>{
  addEventListener('pageshow',check);document.addEventListener('visibilitychange',check);setInterval(check,30000);
  addEventListener('storage',e=>{if(e.key===lockId){epoch++;forget();if(active)lock(false)}});
  async function bytes(path){const u=new URL(path,base);if(u.origin!==base.origin||!u.pathname.startsWith(base.pathname)||path.includes('..'))throw Error('Invalid release path');const r=await fetch(u);if(!r.ok||r.redirected)throw Error('Connect to finish downloading this guide.');return r.arrayBuffer()}
- async function load(raw){clean();contentKey=await C.importKey(raw);const index=JSON.parse(C.dec.decode(await C.open(contentKey,await bytes(access.index),access.pack_id+':index')));for(const f of index.files)entries.set(f.path,f)}
+ async function load(raw){clean();if(scope==='guest'&&(access.guest_policy!==1||!access.guest_index))throw Error('Guest access needs an updated release');contentKey=await C.importKey(raw);const index=JSON.parse(C.dec.decode(await C.open(contentKey,await bytes(scope==='guest'?access.guest_index:access.index),access.pack_id+':index')));for(const f of index.files)entries.set(f.path,f)}
  async function resource(path){
   await ready;check();if(!active)throw Error('Locked');
   if(objects.has(path))return objects.get(path);
@@ -46,7 +46,7 @@ window.TripFiles=(()=>{
     const saved=existing||C.lease(shared||raw,id);expires=saved.expires;
     forget();if(scope==='family'){try{localStorage.removeItem('travel-guest:'+base.pathname);sessionStorage.removeItem('travel-guest:'+base.pathname)}catch{}}try{if(remember)localStorage.setItem(storageId,JSON.stringify(saved));else if(access.format===2)sessionStorage.setItem(storageId,JSON.stringify(saved))}catch{setStatus('Device storage unavailable; unlock lasts for this page.','无法保存设备信息；此次解锁仅在当前页面有效。')}
     lockStamp=readStamp();active=true;form.reset();main.replaceChildren();nav.hidden=false;nav.style.display='';language.hidden=false;
-    const button=document.createElement('button');button.className='language';button.id='lock-guide';button.textContent=tr('Logout','退出登录');button.onclick=()=>lock();document.querySelector('.mast').append(button);resolve();
+    const button=document.createElement('button');button.className='language';button.id='lock-guide';button.innerHTML=TripLanguage.controlIcon('logout');button.setAttribute('aria-label',tr('Logout','退出登录'));button.title=tr('Logout','退出登录');button.onclick=()=>lock();document.querySelector('.mast-actions').append(button);resolve();
    }
    // Prefer a saved trip-only session so a guest never silently gains a family role.
    for(const savedScope of (access.format===2?['guest','family']:['family'])){
@@ -68,5 +68,5 @@ window.TripFiles=(()=>{
   }
   start();
  });
- return {ready,encrypted:true,get canSwitchTrips(){return active&&scope==='family'},json:async p=>{const v=await resource(p);if(!v?.json)throw Error('Trip data missing');const result=structuredClone(v.json);if(scope==='guest'&&p==='data/config.json')delete result.other_trips;return result},url:async p=>{const v=await resource(p);if(!v?.url)throw Error('Asset unavailable');return v.url},lock};
+ return {ready,encrypted:true,get canViewPrivate(){return active&&scope==='family'},get canSwitchTrips(){return active&&scope==='family'},json:async p=>{const v=await resource(p);if(!v?.json)throw Error('Trip data missing');const result=structuredClone(v.json);if(scope==='guest'&&p==='data/config.json')delete result.other_trips;return result},url:async p=>{const v=await resource(p);if(!v?.url)throw Error('Asset unavailable');return v.url},lock};
 })();

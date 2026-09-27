@@ -11,10 +11,9 @@ window.TripLibrary=(()=>{
  function element(tag,text,className){const el=document.createElement(tag);if(text)el.textContent=text;if(className)el.className=className;return el}
  function paint(){
   if(!trip)return;
-  button.textContent=tr('Trips','旅程');button.setAttribute('aria-label',tr('Choose a trip','选择旅程'));
+  button.innerHTML=TripLanguage.controlIcon('trips');button.title=tr('Trips','旅程');button.setAttribute('aria-label',tr('Choose a trip','选择旅程'));
   const toolbar=element('div',null,'trip-library-toolbar');
-  const language=element('button',null,'language');language.dataset.languageSwitch='';
-  const close=element('button','×','language');close.setAttribute('aria-label',tr('Close trips','关闭旅程列表'));close.onclick=()=>dialog.close();toolbar.append(language,close);
+  const close=element('button','×','language');close.setAttribute('aria-label',tr('Close trips','关闭旅程列表'));close.onclick=()=>dialog.close();toolbar.append(close);
   dialog.replaceChildren(toolbar,element('h2',tr('Your trips','您的旅程')));
   const current=element('button',null,'trip-library-item current');current.type='button';current.setAttribute('aria-current','true');
   current.append(element('strong',title(trip.title)),element('span',tr('Current trip','当前旅程')));
@@ -32,7 +31,7 @@ window.TripLibrary=(()=>{
  function init(current,settings){
   if(TripFiles.canSwitchTrips===false)return;
   trip=current;config=settings;
-  if(!button){button=element('button',null,'language');button.id='choose-trip';button.setAttribute('aria-haspopup','dialog');document.querySelector('.mast').append(button);
+  if(!button){button=element('button',null,'language');button.id='choose-trip';button.setAttribute('aria-haspopup','dialog');document.querySelector('.mast-actions').append(button);
    dialog=element('dialog');dialog.id='trip-library';document.body.append(dialog);
    button.onclick=()=>{paint();dialog.showModal()};dialog.onclick=e=>{if(e.target===dialog)dialog.close()};addEventListener('trip-language-change',paint);
   }paint();

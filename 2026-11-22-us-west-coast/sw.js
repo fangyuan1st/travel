@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = "d9e581cdf47794cb";
+const VERSION = "014c2e0277616c9c";
 const BASE = new URL('./', self.location.href);
 const PREFIX = 'travel-' + encodeURIComponent(BASE.pathname) + '-';
 const CACHE = PREFIX + VERSION;
@@ -30,23 +30,26 @@ self.addEventListener('activate',event=>event.waitUntil((async()=>{
   // Keep older packs until a new complete download succeeds.
   await self.clients.claim();
 })()));
-async function status(){const m=await manifest(),c=await caches.open(CACHE);let count=0;for(const a of m.assets)if(await c.match(url(a.url)))count++;return {ready:count===m.assets.length,count,total:m.assets.length,version:VERSION};}
+const visibleAssets=(m,audience)=>m.assets.filter(a=>!a.audience||a.audience==='all'||a.audience===audience);
+async function status(audience='family'){const m=await manifest(),assets=visibleAssets(m,audience),c=await caches.open(CACHE);let count=0;for(const a of assets)if(await c.match(url(a.url)))count++;return {ready:count===assets.length,count,total:assets.length,version:VERSION};}
 let downloadRunning=false;
 self.addEventListener('message',event=>{
   const port=event.ports[0];if(!port)return;
   event.waitUntil((async()=>{
     try{
-      if(event.data.type==='STATUS'){port.postMessage(await status());return;}
+      const audience=event.data.audience==='guest'?'guest':'family';
+      if(event.data.type==='STATUS'){port.postMessage(await status(audience));return;}
       if(event.data.type!=='DOWNLOAD')return;
       if(downloadRunning)throw Error('A download is already running in another tab.');
       downloadRunning=true;
       try{const m=await manifest(),c=await caches.open(CACHE);let completed=0;
-        for(const a of m.assets){
+        const assets=visibleAssets(m,audience);for(const a of assets){
           if(!(await c.match(url(a.url))))await c.put(url(a.url),await checkedFetch(a));
-          completed++;port.postMessage({type:'progress',completed,total:m.assets.length});
+          completed++;port.postMessage({type:'progress',completed,total:assets.length});
         }
-        const result=await status();
-        if(result.ready)for(const key of await caches.keys())if(key.startsWith(PREFIX)&&key!==CACHE)await caches.delete(key);
+        const result=await status(audience);
+        const allSaved=(await Promise.all(m.assets.map(a=>c.match(url(a.url))))).every(Boolean);
+        if(result.ready&&allSaved)for(const key of await caches.keys())if(key.startsWith(PREFIX)&&key!==CACHE)await caches.delete(key);
         port.postMessage(result);
       }finally{downloadRunning=false;}
     }catch(error){port.postMessage({error:error.message});}
