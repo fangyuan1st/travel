@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = "9875718f22f6b77d";
+const VERSION = "136cfc965ca44f68";
 const BASE = new URL('./', self.location.href);
 const PREFIX = 'travel-' + encodeURIComponent(BASE.pathname) + '-';
 const CACHE = PREFIX + VERSION;

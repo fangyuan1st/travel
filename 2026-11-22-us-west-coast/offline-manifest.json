@@ -1,6 +1,6 @@
 {
-  "version": "9875718f22f6b77d",
-  "total_bytes": 135211170,
+  "version": "136cfc965ca44f68",
+  "total_bytes": 135212162,
   "assets": [
     {
       "url": "index.html",
@@ -25,8 +25,8 @@
     },
     {
       "url": "app.js",
-      "bytes": 50550,
-      "sha256": "844c8eb3f23a31aa76ecb72bbdb9a2f7c051b0fa12d64ceb151bbbb37c3b7478",
+      "bytes": 51542,
+      "sha256": "537abfdd34afc2c3faff542400ff69ab1d27f2a7c074ef2c43c86df88b10b79c",
       "group": "core",
       "audience": "all"
     },
