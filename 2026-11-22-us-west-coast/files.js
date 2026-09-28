@@ -31,7 +31,7 @@ window.TripFiles=(()=>{
    const main=document.getElementById('app'),nav=document.querySelector('.bottom-nav'),language=document.getElementById('language');nav.hidden=true;nav.style.display='none';language.hidden=false;
    main.innerHTML='<section class="unlock-card card"><h1 data-unlock="title"></h1><p data-unlock="intro"></p><form id="unlock-form"><label for="guest-password" data-unlock="password"></label><input id="guest-password" type="password" autocomplete="current-password" required><label class="remember-option"><input id="remember-device" type="checkbox"><span data-unlock="remember"></span></label><button class="button primary" type="submit" data-unlock="unlock"></button></form><p id="unlock-status" role="status" aria-live="polite"></p></section>';
    const status=document.getElementById('unlock-status'),form=document.getElementById('unlock-form');
-   const labels={title:['Private travel guide','私人旅行指南'],intro:['Enter your assigned passcode to open this guide.','输入您的口令以打开指南。'],password:['Passcode','口令'],remember:['Remember this device for 30 days','在此设备上记住30天'],unlock:['Unlock','解锁'],retry:['Retry','重试']};
+   const labels={title:['Private travel guide','私人旅行指南'],intro:['Enter your assigned passcode to open this guide.','输入您的口令以打开指南。'],password:['Passcode','口令'],remember:['Remember this device for 30 days','在此设备上记住30天'],unlock:['Login','登录'],retry:['Retry','重试']};
    function paintEntry(){TripLanguage.paint();if(!active)document.title=tr(...labels.title);main.querySelectorAll('[data-unlock]').forEach(el=>el.textContent=tr(...labels[el.dataset.unlock]));if(statusPair)setStatus(...statusPair)}
    addEventListener('trip-language-change',paintEntry);paintEntry();
    try{
@@ -44,7 +44,7 @@ window.TripFiles=(()=>{
     await load(raw);if(epoch!==attemptEpoch){clean();throw Error('Locked during unlock')}
     const id=leaseId();
     const saved=existing||C.lease(shared||raw,id);expires=saved.expires;
-    forget();if(scope==='family'){try{localStorage.removeItem('travel-guest:'+base.pathname);sessionStorage.removeItem('travel-guest:'+base.pathname)}catch{}}try{if(remember)localStorage.setItem(storageId,JSON.stringify(saved));else if(access.format===2)sessionStorage.setItem(storageId,JSON.stringify(saved))}catch{setStatus('Device storage unavailable; unlock lasts for this page.','无法保存设备信息；此次解锁仅在当前页面有效。')}
+    forget();if(scope==='family'){try{localStorage.removeItem('travel-guest:'+base.pathname);sessionStorage.removeItem('travel-guest:'+base.pathname)}catch{}}try{if(remember)localStorage.setItem(storageId,JSON.stringify(saved));else if(access.format===2)sessionStorage.setItem(storageId,JSON.stringify(saved))}catch{setStatus('Device storage unavailable; login lasts for this page.','无法保存设备信息；此次登录仅在当前页面有效。')}
     lockStamp=readStamp();active=true;form.reset();main.replaceChildren();nav.hidden=false;nav.style.display='';language.hidden=false;
     const button=document.createElement('button');button.className='language';button.id='lock-guide';button.innerHTML=TripLanguage.controlIcon('logout');button.setAttribute('aria-label',tr('Logout','退出登录'));button.title=tr('Logout','退出登录');button.onclick=()=>lock();document.querySelector('.mast-actions').append(button);resolve();
    }
@@ -59,7 +59,7 @@ window.TripFiles=(()=>{
    }
    form.onsubmit=async event=>{
     event.preventDefault();const button=form.querySelector('button'),input=document.getElementById('guest-password'),remember=document.getElementById('remember-device').checked,attemptEpoch=epoch;
-    button.disabled=true;setStatus('Unlocking…','正在解锁…');let raw,shared;
+    button.disabled=true;setStatus('Logging in…','正在登录…');let raw,shared;
     try{const result=await C.unlockAccess(input.value,access);raw=result.raw;shared=result.shared;if(access.format===2)selectScope(result.scope);input.value='';await finish(raw,remember,null,shared,attemptEpoch)}
     catch{clean();raw?setStatus('Unable to open the guide. Connect and retry.','无法打开指南，请联网后重试。'):setStatus('Incorrect passcode. Please try again.','口令不正确，请重试。')}
     finally{raw?.fill(0);shared?.fill(0);button.disabled=false}

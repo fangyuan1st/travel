@@ -49,6 +49,7 @@ window.TripMap=(()=>{
    });
    const labels=L.layerGroup().addTo(map),roadLabels=L.layerGroup().addTo(map);
    function updateLabels(){
+    if(token!==generation||active!==map)return;
     const zoom=map.getZoom();if(zoom>=12){if(!map.hasLayer(streets))streets.addTo(map)}else if(map.hasLayer(streets))map.removeLayer(streets);
     labels.clearLayers();roadLabels.clearLayers();const bounds=map.getBounds();
     const cityCells=new Set();[...base.cities.features].sort((a,b)=>a.properties.rank-b.properties.rank).forEach(f=>{const ll=latlng(f.geometry.coordinates);if(!bounds.contains(ll)||(zoom<9&&f.properties.rank>5))return;const pixel=map.latLngToContainerPoint(ll),cell=Math.floor(pixel.x/125)+','+Math.floor(pixel.y/40);if(cityCells.has(cell))return;cityCells.add(cell);const el=document.createElement('span');el.textContent=zh&&opts.config.city_names[f.properties.name]?opts.config.city_names[f.properties.name]+' ('+f.properties.name+')':f.properties.name;L.marker(ll,{interactive:false,icon:L.divIcon({className:'geo-city',html:el,iconSize:[140,20],iconAnchor:[70,10]})}).addTo(labels)});
@@ -59,8 +60,8 @@ window.TripMap=(()=>{
      const el=document.createElement('span');el.textContent=name;L.marker(ll,{interactive:false,icon:L.divIcon({className:'geo-road-label',html:el,iconSize:[120,18],iconAnchor:[60,9]})}).addTo(roadLabels);
     }
    }
-   const fit=()=>{if(fitPoints.length)map.fitBounds(L.latLngBounds(fitPoints),{padding:[35,35],maxZoom:14,animate:false});else map.setView(opts.config.center,opts.config.zoom)};
-   document.getElementById('fit-route').onclick=fit;map.on('zoomend moveend',updateLabels);L.control.scale({imperial:false}).addTo(map);fit();updateLabels();
+   const fit=()=>{if(fitPoints.length)map.fitBounds(L.latLngBounds(fitPoints),{paddingTopLeft:[75,35],paddingBottomRight:[35,35],maxZoom:14,animate:false});else map.setView(opts.config.center,opts.config.zoom)};
+   const FitControl=L.Control.extend({options:{position:'topleft'},onAdd(){const box=L.DomUtil.create('div','leaflet-bar trip-fit-control'),button=L.DomUtil.create('button','',box);button.type='button';button.id='fit-route';button.title=txt('Fit route','显示完整路线');button.setAttribute('aria-label',button.title);button.innerHTML='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5M8 12h8m-4-4v8"/></svg>';L.DomEvent.disableClickPropagation(box);L.DomEvent.disableScrollPropagation(box);L.DomEvent.on(button,'click',e=>{L.DomEvent.stop(e);fit()});return box}});new FitControl().addTo(map);map.on('zoomend moveend',updateLabels);L.control.scale({imperial:false}).addTo(map);fit();updateLabels();
    status.textContent=txt('Offline planning map · drag to pan, pinch or use + / − to zoom.','离线行程参考地图 · 拖动平移，双指或使用 + / − 缩放。')+(hasAccessGap?' '+(opts.config.access_gap_note[opts.lang]||opts.config.access_gap_note.en):'');
   }catch(e){if(token===generation)status.textContent=txt('Map files are not saved yet. Connect and save the full offline pack, then reopen this map.','地图文件尚未保存。请联网保存完整离线包，再打开地图。');console.error(e)}
  }
