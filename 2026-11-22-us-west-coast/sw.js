@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = "136cfc965ca44f68";
+const VERSION = "fd5b937bda4677ca";
 const BASE = new URL('./', self.location.href);
 const PREFIX = 'travel-' + encodeURIComponent(BASE.pathname) + '-';
 const CACHE = PREFIX + VERSION;
@@ -48,8 +48,9 @@ self.addEventListener('message',event=>{
           completed++;port.postMessage({type:'progress',completed,total:assets.length});
         }
         const result=await status(audience);
-        const allSaved=(await Promise.all(m.assets.map(a=>c.match(url(a.url))))).every(Boolean);
-        if(result.ready&&allSaved)for(const key of await caches.keys())if(key.startsWith(PREFIX)&&key!==CACHE)await caches.delete(key);
+        // A complete pack is audience-specific. Family and guest ciphertext
+        // are separate sets; requiring both would keep old versions forever.
+        if(result.ready)for(const key of await caches.keys())if(key.startsWith(PREFIX)&&key!==CACHE)await caches.delete(key);
         port.postMessage(result);
       }finally{downloadRunning=false;}
     }catch(error){port.postMessage({error:error.message});}
