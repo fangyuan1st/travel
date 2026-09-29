@@ -8,3 +8,18 @@ window.TripLanguage=(()=>{
  document.addEventListener('click',e=>{if(e.target.closest('#language'))toggle()});
  paint();return {get value(){return lang},text,paint,controlIcon};
 })();
+
+/* Reserve the actual fixed navigation height, including its desktop offset and iPhone safe area. */
+(()=>{
+ const nav=document.querySelector('.bottom-nav');
+ if(!nav)return;
+ function update(){
+  const rect=nav.getBoundingClientRect();
+  const covered=rect.height?Math.max(0,window.innerHeight-rect.top):0;
+  document.documentElement.style.setProperty('--footer-nav-clearance',Math.ceil(covered+20)+'px');
+ }
+ if(window.ResizeObserver)new ResizeObserver(update).observe(nav);
+ window.addEventListener('resize',update);
+ window.visualViewport?.addEventListener('resize',update);
+ update();
+})();
