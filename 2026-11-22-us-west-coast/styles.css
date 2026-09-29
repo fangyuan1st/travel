@@ -38,3 +38,5 @@ svg{flex-shrink:0}button{color:inherit}button:disabled{opacity:.55;cursor:wait}.
 .app-version{text-align:center;color:var(--muted,#63747c);font-size:12px;padding:12px 16px var(--footer-nav-clearance,calc(140px + env(safe-area-inset-bottom)));}
 
 .remaining-bookings{background:#fff6e3;border:1px solid #e5c67d;margin:0 0 20px;color:#64480b}.remaining-bookings summary{cursor:pointer;font-weight:700}.remaining-bookings summary span{margin-right:5px}.remaining-bookings li{margin:10px 0;line-height:1.6}
+
+#share-trip-dialog input{display:block;width:100%;padding:12px;margin:18px 0;border:1px solid var(--line);border-radius:8px}#share-trip-dialog>.language{float:right}@media(max-width:380px){.mast{padding-left:8px;padding-right:8px}.brand{font-size:12px;gap:5px;letter-spacing:0}.brand-icon{width:28px;height:32px}.mast-actions{gap:0}.mast-actions .language{width:36px;min-width:36px;padding:6px}}
