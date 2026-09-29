@@ -46,7 +46,7 @@ window.TripFiles=(()=>{
     const saved=existing||C.lease(shared||raw,id);expires=saved.expires;
     forget();if(scope==='family'){try{localStorage.removeItem('travel-guest:'+base.pathname);sessionStorage.removeItem('travel-guest:'+base.pathname)}catch{}}try{if(remember)localStorage.setItem(storageId,JSON.stringify(saved));else if(access.format===2)sessionStorage.setItem(storageId,JSON.stringify(saved))}catch{setStatus('Device storage unavailable; login lasts for this page.','无法保存设备信息；此次登录仅在当前页面有效。')}
     lockStamp=readStamp();active=true;form.reset();main.replaceChildren();nav.hidden=false;nav.style.display='';language.hidden=false;
-    const button=document.createElement('button');button.className='language';button.id='lock-guide';button.innerHTML=TripLanguage.controlIcon('logout');button.setAttribute('aria-label',tr('Logout','退出登录'));button.title=tr('Logout','退出登录');button.onclick=()=>lock();document.querySelector('.mast-actions').append(button);resolve();
+    const button=document.createElement('a');button.className='footer-logout';button.href='#';button.id='lock-guide';button.textContent=tr('Logout','退出登录');button.setAttribute('aria-label',tr('Logout','退出登录'));button.title=tr('Logout','退出登录');button.onclick=event=>{event.preventDefault();lock()};document.querySelector('.app-version').append(button);resolve();
    }
    // Prefer a saved trip-only session so a guest never silently gains a family role.
    for(const savedScope of (access.format===2?['guest','family']:['family'])){
